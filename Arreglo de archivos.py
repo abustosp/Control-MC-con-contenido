@@ -23,9 +23,14 @@ Tabla_Archivos['Archivo con ruta'] = ruta + '/' + Tabla_Archivos['Archivo']
 Tabla_Archivos['Primera celda'] = np.nan
 
 # Leer cada archivo y guardar el contenido de la primera celda en una columna llamada 'Primera celda'
-for i in range(len(Tabla_Archivos)):
-    Tabla_Archivos['Primera celda'][i] = pd.read_excel(Tabla_Archivos['Archivo con ruta'][i], header=None).iloc[0,0]
-    del i
+# for i in range(len(Tabla_Archivos)):
+#     Tabla_Archivos['Primera celda'][i] = pd.read_excel(Tabla_Archivos['Archivo con ruta'][i], header=None).iloc[0,0]
+#     del i
+
+def obtener_primera_celda(archivo):
+    return pd.read_excel(archivo, header=None).iloc[0,0]
+
+Tabla_Archivos['Primera celda'] = Tabla_Archivos['Archivo con ruta'].apply(obtener_primera_celda)
 
 #crear la Carpeta 'Compras Procesadas' en la 'ruta' si no existe
 if not os.path.exists(ruta + '/Compras Procesadas'):

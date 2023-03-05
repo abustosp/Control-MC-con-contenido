@@ -19,9 +19,14 @@ df['Archivo con ruta'] = ruta + '/' + df['Archivo']
 df['Primera celda'] = np.nan
 
 # Por cada archivo en la columna 'Archivo' se debe leer el contnido de la primera celda y guardarlo en la columna 'Primera celda'
-for i in range(len(df)):
-    df['Primera celda'][i] = pd.read_excel(df['Archivo con ruta'][i], header=None).iloc[0,0]
-del i
+# for i in range(len(df)):
+#     df['Primera celda'][i] = pd.read_excel(df['Archivo con ruta'][i], header=None).iloc[0,0]
+# del i
+
+def obtener_primera_celda(df):
+    return pd.read_excel(df, header=None).iloc[0,0]
+
+df['Primera celda'] = df['Archivo con ruta'].apply(obtener_primera_celda)
 
 #Crear la columa 'CUIT Archivo' con el valor de archivo a partir de la posicion 20 con un largo de 11 caracteres
 df['CUIT Archivo'] = df['Archivo'].str.slice(19, 30)
