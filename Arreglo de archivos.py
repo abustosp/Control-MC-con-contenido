@@ -39,18 +39,22 @@ for i in range(len(Tabla_Archivos)):
     # si la columna 'Archivo' contiene ' MCR ' entonces filtrar los datos donde el 'Tipo' contenga ' B'
     if ' MCR ' in Tabla_Archivos['Archivo'][i]:
         df = df[df['Tipo'].str.contains(' B') == False]
-        df.to_excel(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i], index=False)
+        #Exportar el dataframe solo si contiene datos
+        if len(df) > 0:
+            df.to_excel(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i], index=False)
     else:
-        df.to_excel(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i], index=False)
+        if len(df) > 0:
+            df.to_excel(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i], index=False)
 
-    #Al archivo recien creado, agregar la primera celda en la primera fila
-    wb = openpyxl.load_workbook(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i])
-    ws = wb.active
-    ws.insert_rows(1)
-    ws['A1'] = Tabla_Archivos['Primera celda'][i]
-    wb.save(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i])
+    if len(df) > 0:
+        #Al archivo recien creado, agregar la primera celda en la primera fila
+        wb = openpyxl.load_workbook(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i])
+        ws = wb.active
+        ws.insert_rows(1)
+        ws['A1'] = Tabla_Archivos['Primera celda'][i]
+        wb.save(ruta + '/Procesado/' + "Procesado - " + Tabla_Archivos['Archivo'][i])
     
-    del i, df, wb, ws
+del i, df, wb, ws
 
 
 # # Consolidar todos los archivos de la carpeta 'Procesado' en un solo archivo
