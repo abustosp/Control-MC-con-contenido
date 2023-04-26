@@ -1,50 +1,66 @@
 import os
 import pandas as pd
 import numpy as np
-from tkinter.filedialog import askdirectory
+from tkinter.filedialog import askdirectory, askopenfilename
 import openpyxl
 
-# seleccionar una carpeta
-ruta = askdirectory(title="Seleccionar la carpeta que contiene los archivos a procesar")
+
+# seleccionar una archivo
+ruta = askopenfilename(title="Seleccionar el archivo que contiene los archivos a procesar")
 
 # Crear una lista con los nombres de los archivos en la carpeta
-archivos = os.listdir(ruta)
+ListaArchivos = pd.read_csv(ruta, header=None, sep="	")[1].tolist()
+del ruta
+
+# Eliminar el primer elemento de la lista
+del ListaArchivos[0]
+
+# Reemplazar los '\\' por '/' en cada elemento de la lista
+ListaArchivos = [archivo.replace('\\', '/') for archivo in ListaArchivos]
+
+ListaArchivosParaIterar = []
+
+# Listar todos los archivos de cada elemento de la lista 'ListaArchivos' en una lista con su ruta completa
+for i in ListaArchivos:
+    Archivos = os.listdir(i)
+    Archivos = [i + '/' + archivo for archivo in Archivos]
+    # Agregar a la lista ArchivosParaIterar los elementos de la lista Archivos
+    ListaArchivosParaIterar.extend(Archivos)
+    del i , Archivos
+
+ListaArchivos = ListaArchivosParaIterar
+del ListaArchivosParaIterar
 
 # Filtrar los que no son '.xlsx'
-archivos = [archivo for archivo in archivos if '.xlsx' in archivo]
+archivos = [archivo for archivo in ListaArchivos if '.xlsx' in archivo]
 
 # Quitar los archivos que empiezan con '~$'
 archivos = [archivo for archivo in archivos if '~$' not in archivo]
 
-# reemplazar '.xlsx' por ''
-archivos = [archivo.replace('.xlsx', '') for archivo in archivos]
-
 # Crear un dataframe con los nombres de los archivos
 Tabla_Archivos = pd.DataFrame(archivos, columns=['Archivo'])
-
-# Agregar la 'ruta' + '/' al 'Nompre'
-Tabla_Archivos['Archivo con ruta'] = ruta + '/' + Tabla_Archivos['Archivo'] + '.xlsx'
+del archivos
 
 # Crear una columna que se llame primera celda
 Tabla_Archivos['Primera celda'] = np.nan
 
-# Leer cada archivo y guardar el contenido de la primera celda en una columna llamada 'Primera celda'
-# for i in range(len(Tabla_Archivos)):
-#     Tabla_Archivos['Primera celda'][i] = pd.read_excel(Tabla_Archivos['Archivo con ruta'][i], header=None).iloc[0,0]
-#     del i
+# Crear una columna que se llame 'ruta' y que contenga la columna 'Archivo' sin el nombre del archivo
+Tabla_Archivos['ruta'] = Tabla_Archivos['Archivo'].str.replace(r'[^/]+$', '' , regex=True)
 
 def obtener_primera_celda(archivo):
     return pd.read_excel(archivo, header=None).iloc[0,0]
 
-Tabla_Archivos['Primera celda'] = Tabla_Archivos['Archivo con ruta'].apply(obtener_primera_celda)
+Tabla_Archivos['Primera celda'] = Tabla_Archivos['Archivo'].apply(obtener_primera_celda)
 
-#crear la Carpeta 'Procesado' en la 'ruta' si no existe
-if not os.path.exists(ruta + '/Procesado'):
-    os.makedirs(ruta + '/Procesado')
+# Crear la Carpeta 'Procesado' en la 'ruta' si no existe de la columna 'ruta' de Tabla_Archivos
+for i in range(len(Tabla_Archivos)):
+    if not os.path.exists(Tabla_Archivos['ruta'][i] + '/Procesado'):
+        os.makedirs(Tabla_Archivos['ruta'][i] + '/Procesado')
+    del i
 
 #Leer cada Excel en un Dataframe_Temporal y Exportarlo a la carpeta 'Procesado'
 for i in range(len(Tabla_Archivos)):
-    df = pd.read_excel(Tabla_Archivos['Archivo con ruta'][i], skiprows=1)
+    df = pd.read_excel(Tabla_Archivos['Archivo'][i], skiprows=1)
     # si la columna 'Archivo' contiene ' MCR ' entonces filtrar los datos donde el 'Tipo' contenga ' B'
     if ' MCR ' in Tabla_Archivos['Archivo'][i]:
         df = df[df['Tipo'].str.contains(' B') == False]
@@ -70,27 +86,14 @@ for i in range(len(Tabla_Archivos)):
         # Agregar una fila con la suma de las columnas 'Imp. Neto Gravado' , 'Imp. Neto No Gravado' , 'Imp. Op. Exentas' , 'IVA' , 'Imp. Total'
         df = pd.concat([df, pd.DataFrame(df[['Imp. Neto Gravado' , 'Imp. Neto No Gravado' , 'Imp. Op. Exentas' , 'IVA' , 'Imp. Total']].sum()).T], ignore_index=True)
 
-        df.to_excel(ruta + '/Procesado/' + Tabla_Archivos['Archivo'][i] + " - Procesado.xlsx", index=False)
+        # Exportar el dataframe a la carpeta 'Procesado' con el nombre del archivo + ' - Procesado.xlsx'
+        df.to_excel(Tabla_Archivos['ruta'][i] + '/Procesado/' + Tabla_Archivos['Archivo'][i].split('/')[-1] + " - Procesado.xlsx", index=False)
 
-
-    if len(df) > 0:
         #Al archivo recien creado, agregar la primera celda en la primera fila
-        wb = openpyxl.load_workbook(ruta + '/Procesado/' + Tabla_Archivos['Archivo'][i] + " - Procesado.xlsx")
+        wb = openpyxl.load_workbook(Tabla_Archivos['ruta'][i] + '/Procesado/' + Tabla_Archivos['Archivo'][i].split('/')[-1] + " - Procesado.xlsx")
         ws = wb.active
         ws.insert_rows(1)
         ws['A1'] = Tabla_Archivos['Primera celda'][i]
-        wb.save(ruta + '/Procesado/' + Tabla_Archivos['Archivo'][i] + " - Procesado.xlsx")
+        wb.save(Tabla_Archivos['ruta'][i] + '/Procesado/' + Tabla_Archivos['Archivo'][i].split('/')[-1] + " - Procesado.xlsx")
     
 del i, df, wb, ws
-
-
-# # Consolidar todos los archivos de la carpeta 'Procesado' en un solo archivo
-# archivos = os.listdir(ruta + '/Procesado')
-# archivos = [archivo for archivo in archivos if 'Procesado' in archivo]
-# df = pd.DataFrame()
-# for i in range(len(archivos)):
-#     df_temp = pd.read_excel(ruta + '/Procesado/' + archivos[i] , skiprows=1)
-#     df = pd.concat([df, df_temp], axis=0)
-#     del i, df_temp
-# df.to_excel(ruta + '/Procesado/Consolidado.xlsx', index=False)
-
