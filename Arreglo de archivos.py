@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from tkinter.filedialog import askdirectory
 import openpyxl
+from tkinter.messagebox import showinfo
 
 # seleccionar una carpeta
 ruta = askdirectory()
@@ -62,6 +63,8 @@ for i in range(len(Tabla_Archivos)):
         wb.save(ruta + '/Procesado/' + Tabla_Archivos['Archivo'][i] + " - Procesado.xlsx")
     
 del i, df, wb, ws
+
+showinfo('Proceso terminado', 'Se han procesado los archivos')
 
 
 # # Consolidar todos los archivos de la carpeta 'Procesado' en un solo archivo
