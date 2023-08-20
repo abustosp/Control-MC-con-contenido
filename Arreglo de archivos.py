@@ -4,6 +4,7 @@ import numpy as np
 from tkinter.filedialog import askdirectory
 import openpyxl
 from tkinter.messagebox import showinfo
+import LIB.formatos as fmt
 
 # seleccionar una carpeta
 ruta = askdirectory()
@@ -57,7 +58,15 @@ for i in range(len(Tabla_Archivos)):
     if len(df) > 0:
         #Al archivo recien creado, agregar la primera celda en la primera fila
         wb = openpyxl.load_workbook(ruta + '/Procesado/' + Tabla_Archivos['Archivo'][i] + " - Procesado.xlsx")
+        # Seleccionar hoja activa
         ws = wb.active
+
+        # Agregar Formatos
+        #fmt.Agregar_filtros(ws)
+        fmt.Aplicar_formato_encabezado(ws)
+        fmt.Aplicar_formato_moneda(ws, ColumnaInicial=12 , ColumnaFinal=16)
+        fmt.Autoajustar_columnas(ws)
+
         ws.insert_rows(1)
         ws['A1'] = Tabla_Archivos['Primera celda'][i]
         wb.save(ruta + '/Procesado/' + Tabla_Archivos['Archivo'][i] + " - Procesado.xlsx")
