@@ -9,6 +9,9 @@ ruta = askdirectory()
 # crear una lista con los nombres de los archivos en la carpeta
 archivos = os.listdir(ruta)
 
+# Filtrar los archivos que tengan la extensión .xlsx
+archivos = [archivo for archivo in archivos if archivo.endswith('.xlsx')]
+
 # crear un dataframe con los nombres de los archivos
 df = pd.DataFrame(archivos, columns=['Archivo'])
 
