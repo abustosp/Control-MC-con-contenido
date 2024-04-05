@@ -60,6 +60,7 @@ def Transformar_ZIP_MC(Directorio):
             '211':'211 - Factura de Crédito electrónica MiPyMEs (FCE) C',
             '3':'3 - Nota de Crédito A',
             '6':'6 - Factura B',
+            '7':'7 - Nota de Débito B',
             '8':'8 - Nota de Crédito B',
     }
         
