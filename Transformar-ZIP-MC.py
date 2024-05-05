@@ -56,6 +56,7 @@ def Transformar_ZIP_MC(Directorio):
             '15':'15 - Recibo C',
             '2':'2 - Nota de Débito A',
             '201':'201 - Factura de Crédito electrónica MiPyMEs (FCE) A',
+            '202':'202 - Factura de Débito electrónica MiPyMEs (FCE) A',
             '203':'203 - Nota de Crédito electrónica MiPyMEs (FCE) A',
             '211':'211 - Factura de Crédito electrónica MiPyMEs (FCE) C',
             '3':'3 - Nota de Crédito A',
